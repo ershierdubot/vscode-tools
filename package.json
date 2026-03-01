@@ -1,0 +1,61 @@
+{
+  "name": "vscode-tools",
+  "displayName": "VSCode Tools",
+  "description": "A collection of useful development tools",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onView:vscodeToolsSidebar"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "views": {
+      "explorer": [
+        {
+          "id": "vscodeToolsSidebar",
+          "name": "VSCode Tools",
+          "when": "true"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "vscodeTools.openParquetViewer",
+        "title": "Open Parquet Viewer",
+        "icon": "$(file-binary)"
+      },
+      {
+        "command": "vscodeTools.refreshTools",
+        "title": "Refresh Tools",
+        "icon": "$(refresh)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "vscodeTools.refreshTools",
+          "when": "view == vscodeToolsSidebar",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^18.x",
+    "@types/vscode": "^1.74.0",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "parquetjs": "^0.11.0"
+  }
+}

@@ -1,36 +1,21 @@
 # VSCode Tools
 
-A curated collection of VSCode extensions and development utilities designed to boost productivity and streamline the development workflow.
+[![CI](https://github.com/ershierdubot/vscode-tools/actions/workflows/ci.yml/badge.svg)](https://github.com/ershierdubot/vscode-tools/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](https://github.com/ershierdubot/vscode-tools/releases)
 
-## 🎯 Overview
+A collection of useful development tools right in your VSCode sidebar.
 
-This repository serves as a centralized hub for custom VSCode extensions and development tools. Whether you're looking for productivity enhancers, code quality tools, or workflow optimizers, you'll find them here.
+## 🚀 Features
 
-## 📦 Extensions
+- 📊 **Parquet Viewer** - View and analyze Parquet files with search, sort, and export
+- 🔧 **JSON Formatter** - Format, minify, and validate JSON
+- 🔐 **Base64 Converter** - Encode and decode Base64 strings
+- ⏰ **Timestamp Converter** - Coming soon!
 
-### Core Extensions
+## 📦 Installation
 
-| Extension | Description | Status |
-|-----------|-------------|--------|
-| `toolkit-core` | Essential development utilities | 🚧 In Progress |
-| `code-snippets` | Reusable code templates | 📋 Planned |
-| `git-enhancer` | Advanced Git integration | 📋 Planned |
-
-### Utility Tools
-
-- **File Manager**: Quick file operations and navigation
-- **Project Scaffolder**: Generate project templates instantly
-- **Code Formatter**: Custom formatting rules and presets
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- [VSCode](https://code.visualstudio.com/) (version 1.60.0 or higher)
-- [Node.js](https://nodejs.org/) (version 16.x or higher)
-- npm or yarn package manager
-
-### Installation
+### From Source
 
 1. Clone this repository:
    ```bash
@@ -43,12 +28,51 @@ This repository serves as a centralized hub for custom VSCode extensions and dev
    npm install
    ```
 
-3. Open in VSCode:
+3. Compile TypeScript:
+   ```bash
+   npm run compile
+   ```
+
+4. Open in VSCode:
    ```bash
    code .
    ```
 
-4. Press `F5` to launch the Extension Development Host
+5. Press `F5` to launch Extension Development Host
+
+## 🎯 Usage
+
+### Opening the Extension
+
+Click the **VSCode Tools** icon in the Activity Bar (left sidebar) to open the tools panel.
+
+### Parquet Viewer
+
+1. Click "Parquet Viewer" in the sidebar
+2. Click "Load Parquet File" to select a .parquet file
+3. View your data with:
+   - **Search**: Type in the search box to filter rows
+   - **Sort**: Click column headers to sort
+   - **Export**: Export data to CSV format
+
+### JSON Formatter
+
+1. Click "JSON Formatter" in the sidebar
+2. Paste your JSON in the input area
+3. Click:
+   - **Format** to pretty-print with indentation
+   - **Minify** to compress to single line
+   - **Validate** to check JSON syntax
+   - **Load File** to open a JSON file
+
+### Base64 Converter
+
+1. Click "Base64 Converter" in the sidebar
+2. Enter text in the input area
+3. Click:
+   - **Encode** to convert to Base64
+   - **Decode** to convert from Base64
+   - **Copy** to copy result to clipboard
 
 ## 🛠️ Development
 
@@ -56,62 +80,57 @@ This repository serves as a centralized hub for custom VSCode extensions and dev
 
 ```
 vscode-tools/
-├── extensions/
-│   ├── toolkit-core/
-│   ├── code-snippets/
-│   └── git-enhancer/
-├── docs/
-├── scripts/
+├── src/
+│   ├── extension.ts              # Extension entry point
+│   ├── providers/
+│   │   └── toolsProvider.ts      # Sidebar tree view
+│   ├── panels/
+│   │   ├── parquetViewerPanel.ts
+│   │   ├── jsonFormatterPanel.ts
+│   │   └── base64ConverterPanel.ts
+│   └── test/                     # Test files
+├── resources/
+│   └── icon.png                  # Extension icon
+├── package.json                  # Extension manifest
 └── README.md
 ```
 
-### Building Extensions
+### Available Scripts
 
 ```bash
-# Build all extensions
-npm run build
-
-# Build specific extension
-npm run build:toolkit-core
-
-# Watch mode for development
-npm run watch
+npm run compile      # Compile TypeScript
+npm run watch        # Watch mode for development
+npm run test         # Run tests
+npm run package      # Create VSIX package
+npm run lint         # Type-check without emit
 ```
 
-### Testing
+### Adding a New Tool
 
-```bash
-# Run all tests
-npm test
-
-# Run tests with coverage
-npm run test:coverage
-```
+1. Create a new panel in `src/panels/yourToolPanel.ts`
+2. Register the command in `src/extension.ts`
+3. Add the tool to `src/providers/toolsProvider.ts`
+4. Add command to `package.json` contributes.commands
 
 ## 📝 Contributing
 
-We welcome contributions! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
+Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for contribution guidelines.
 
-### Contribution Workflow
+## 📋 Changelog
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
+See [CHANGELOG.md](./CHANGELOG.md) for version history.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
+This project is licensed under the MIT License - see [LICENSE](./LICENSE) for details.
 
 ## 🙏 Acknowledgments
 
 - VSCode Team for the excellent extension API
-- Open source community for inspiration and tools
-- Contributors who make this project better
+- Contributors and users of this extension
 
 ---
 
-**Happy Coding!** 🎉
+**Enjoy coding!** 🎉
 
-For issues and feature requests, please use the [GitHub Issues](https://github.com/ershierdubot/vscode-tools/issues) page.
+[Report Issue](https://github.com/ershierdubot/vscode-tools/issues) | [Request Feature](https://github.com/ershierdubot/vscode-tools/issues)

@@ -2,8 +2,9 @@
   "name": "vscode-tools",
   "displayName": "VSCode Tools",
   "description": "A collection of useful development tools including Parquet Viewer, JSON Formatter, and more",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "publisher": "ershierdu",
+  "icon": "resources/icon.png",
   "engines": {
     "vscode": "^1.74.0"
   },
@@ -34,11 +35,20 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "vscodeTools",
+          "title": "VSCode Tools",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
     "views": {
-      "explorer": [
+      "vscodeTools": [
         {
           "id": "vscodeToolsSidebar",
-          "name": "VSCode Tools",
+          "name": "Tools",
           "when": "true"
         }
       ]
@@ -47,12 +57,20 @@
       {
         "command": "vscodeTools.openParquetViewer",
         "title": "Open Parquet Viewer",
-        "icon": "$(file-binary)"
+        "icon": "$(file-binary)",
+        "category": "VSCode Tools"
+      },
+      {
+        "command": "vscodeTools.openJsonFormatter",
+        "title": "Open JSON Formatter",
+        "icon": "$(bracket)",
+        "category": "VSCode Tools"
       },
       {
         "command": "vscodeTools.refreshTools",
         "title": "Refresh Tools",
-        "icon": "$(refresh)"
+        "icon": "$(refresh)",
+        "category": "VSCode Tools"
       }
     ],
     "menus": {

@@ -67,6 +67,12 @@
         "category": "VSCode Tools"
       },
       {
+        "command": "vscodeTools.openBase64Converter",
+        "title": "Open Base64 Converter",
+        "icon": "$(symbol-string)",
+        "category": "VSCode Tools"
+      },
+      {
         "command": "vscodeTools.refreshTools",
         "title": "Refresh Tools",
         "icon": "$(refresh)",

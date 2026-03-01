@@ -166,7 +166,8 @@ export class ParquetViewerPanel {
             filteredCount: this._filteredRows.length,
             totalCount: this._currentData.totalRows,
             page: 0,
-            totalPages: Math.ceil(this._filteredRows.length / this._pageSize)
+            totalPages: Math.ceil(this._filteredRows.length / this._pageSize),
+            searchQuery: lowerQuery
         });
     }
 
@@ -309,6 +310,15 @@ tr:nth-child(even):hover { background: var(--vscode-list-hoverBackground); }
 .cell-false { color: var(--vscode-testing-iconFailed); }
 .cell-string { color: var(--vscode-symbolIcon-stringForeground); }
 .cell-null { color: var(--vscode-descriptionForeground); font-style: italic; }
+.highlight { background-color: var(--vscode-editor-findMatchHighlightBackground) !important; padding: 0 2px; border-radius: 2px; }
+.row-detail-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; }
+.row-detail-modal.active { display: flex; }
+.row-detail-content { background: var(--vscode-editor-background); border: 1px solid var(--vscode-panel-border); border-radius: 8px; padding: 20px; max-width: 600px; max-height: 80vh; overflow-y: auto; min-width: 400px; }
+.row-detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--vscode-panel-border); }
+.row-detail-row { display: flex; padding: 8px 0; border-bottom: 1px solid var(--vscode-panel-border); }
+.row-detail-row:last-child { border-bottom: none; }
+.row-detail-label { font-weight: 600; width: 150px; color: var(--vscode-descriptionForeground); }
+.row-detail-value { flex: 1; font-family: var(--vscode-editor-font-family); }
 .pagination { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 15px; padding: 10px; }
 .pagination button { padding: 6px 14px; font-size: 12px; }
 .pagination span { font-size: 13px; color: var(--vscode-foreground); font-weight: 500; }
@@ -343,6 +353,18 @@ tr:nth-child(even):hover { background: var(--vscode-list-hoverBackground); }
     <div class="empty-state">
         <div class="empty-state-icon">📂</div>
         <p>Click "Load" to open a Parquet file</p>
+        <p style="font-size: 12px; margin-top: 5px;">💡 Tip: Click any row to view details</p>
+    </div>
+</div>
+
+<!-- Row Detail Modal -->
+<div class="row-detail-modal" id="rowModal">
+    <div class="row-detail-content">
+        <div class="row-detail-header">
+            <h3>📋 Row Details</h3>
+            <button class="btn" onclick="closeRowModal()">✕</button>
+        </div>
+        <div id="rowDetailBody"></div>
     </div>
 </div>
 <script>
@@ -366,12 +388,50 @@ document.getElementById('searchInput').addEventListener('input', (e) => {
     searchTimeout = setTimeout(() => vscode.postMessage({command: 'search', query: e.target.value}), 300);
 });
 
-function formatCell(value, type) {
-    if (value === null || value === undefined) return '<span class="cell-null">NULL</span>';
-    if (type === 'BOOLEAN') return '<span class="cell-boolean cell-' + value + '">' + (value ? '✓ true' : '✗ false') + '</span>';
-    if (type === 'DOUBLE' || type === 'FLOAT' || type === 'INT64' || type === 'INT32') return '<span class="cell-number">' + value + '</span>';
-    if (type === 'STRING') return '<span class="cell-string">' + value + '</span>';
-    return String(value);
+let currentSearchQuery = '';
+
+function formatCell(value, type, highlightText = '') {
+    let formatted;
+    if (value === null || value === undefined) formatted = '<span class="cell-null">NULL</span>';
+    else if (type === 'BOOLEAN') formatted = '<span class="cell-boolean cell-' + value + '">' + (value ? '✓ true' : '✗ false') + '</span>';
+    else if (type === 'DOUBLE' || type === 'FLOAT' || type === 'INT64' || type === 'INT32') formatted = '<span class="cell-number">' + value + '</span>';
+    else if (type === 'STRING') formatted = '<span class="cell-string">' + escapeHtml(value) + '</span>';
+    else formatted = escapeHtml(String(value));
+    
+    if (highlightText && String(value).toLowerCase().includes(highlightText.toLowerCase())) {
+        const regex = new RegExp('(' + escapeRegex(highlightText) + ')', 'gi');
+        formatted = formatted.replace(regex, '<span class="highlight">$1</span>');
+    }
+    return formatted;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function escapeRegex(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function showRowDetail(rowIndex) {
+    if (!currentData) return;
+    const actualIndex = currentPage * pageSize + rowIndex;
+    const row = filteredRows[actualIndex];
+    if (!row) return;
+    
+    const detailHtml = currentData.columns.map((col, i) => 
+        '<div class="row-detail-row"><div class="row-detail-label">' + typeIcons[col.type] + ' ' + col.name + '</div>' +
+        '<div class="row-detail-value">' + formatCell(row[i], col.type) + '</div></div>'
+    ).join('');
+    
+    document.getElementById('rowDetailBody').innerHTML = detailHtml;
+    document.getElementById('rowModal').classList.add('active');
+}
+
+function closeRowModal() {
+    document.getElementById('rowModal').classList.remove('active');
 }
 
 function render(data) {
@@ -396,8 +456,8 @@ function render(data) {
     ).join('');
     
     const tableBody = data.rows.map((row, idx) => 
-        '<tr><td class="row-num">' + (data.page * pageSize + idx + 1) + '</td>' + 
-        visibleIndices.map(i => '<td>' + formatCell(row[i], data.columns[i].type) + '</td>').join('') + '</tr>'
+        '<tr onclick="showRowDetail(' + idx + ')" style="cursor:pointer;"><td class="row-num">' + (data.page * pageSize + idx + 1) + '</td>' + 
+        visibleIndices.map(i => '<td>' + formatCell(row[i], data.columns[i].type, data.searchQuery || '') + '</td>').join('') + '</tr>'
     ).join('');
     
     const totalPages = Math.ceil(data.filteredCount / pageSize);
@@ -430,10 +490,15 @@ function changePage(p) { vscode.postMessage({command: 'changePage', page: p}); }
 
 window.addEventListener('message', e => {
     const m = e.data;
+    if (m.searchQuery !== undefined) currentSearchQuery = m.searchQuery;
     if (m.command === 'fileLoaded') render(m);
     if (m.command === 'dataFiltered') render({...currentData, ...m});
     if (m.command === 'pageChanged') render({...currentData, rows: m.rows, page: m.page});
     if (m.command === 'columnsUpdated') render({...currentData, visibleColumns: m.visibleColumns, rows: m.rows});
+});
+
+document.getElementById('rowModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('rowModal')) closeRowModal();
 });
 </script>
 </body>
